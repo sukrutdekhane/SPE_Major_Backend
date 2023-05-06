@@ -22,103 +22,58 @@ import javax.management.modelmbean.ModelMBeanInfo;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static com.example.SPE_Major_project.Service.OtpService.*;
+
 
 @Service
+@RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService{
 
 
     private static final Integer EXPIRE_MIN = 5;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationRepository authenticationRepository;
 
     private static LoadingCache<String, Integer> otpCache;
 
-    private final Environment env;
-    private final AuthenticationRepository authenticationRepository;
 
-    public AuthenticationServiceImpl(Environment env, AuthenticationRepository authenticationRepository) {
-        this.env = env;
-        this.authenticationRepository = authenticationRepository;
-        otpCache = CacheBuilder.newBuilder()
-                .expireAfterWrite(EXPIRE_MIN, TimeUnit.MINUTES)
-                .build(new CacheLoader<String, Integer>() {
-                    @Override
-                    public Integer load(String s) throws Exception {
-                        return 0;
-                    }
-                });
-    }
-
-    public static void clearOTPFromCache(String key) {
-        otpCache.invalidate(key);
-    }
-
-    public static String getOPTByKey(String key)
+    public boolean register(User request,String otp)
     {
-        Integer otp = otpCache.getIfPresent(key);
-        System.out.println("cache:"+otp);
-        if(otp==null)
-            return "-99";
-        else return otp.toString();
-    }
+        String pto = getOPTByKey(request.getMobileNumber());
 
-    public String register(UserDetailsAndOtpDto request)
-    {
-        System.out.println(request);
-        System.out.println(request.getUser().getMobileNumber());
-        String pto = getOPTByKey(request.getUser().getMobileNumber());
-        System.out.println("PTO: "+pto);
-        System.out.println("OTP: "+request.getOtp());
-
-        if(!request.getOtp().equals(pto))
+        if(!otp.equals(pto))
         {
-            return "Invalid Otp";
+            return false;
         }
         var user = User.builder()
-                .firstName(request.getUser().getFirstName())
-                .lastName(request.getUser().getLastName())
-                .mobileNumber(request.getUser().getMobileNumber())
-                .email(request.getUser().getEmail())
-                .password(passwordEncoder.encode(request.getUser().getPassword()))
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .mobileNumber(request.getMobileNumber())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .build();
         var savedUser = authenticationRepository.save(user);
-        return("successfully registered New User");
+        return true;
     }
 
-    public void otpForRegistration(String phoneNumber)
+
+    public boolean otpForForgetPassword(String phoneNumber)
     {
-        PhoneNumber to = new PhoneNumber("+91"+phoneNumber);
-        PhoneNumber from = new PhoneNumber(env.getProperty("app.trial_number"));
-        String otp = generateOTP(phoneNumber).toString();
+        Integer otp = generateOTP(phoneNumber);
         System.out.println(otp);
-        String otpMessage = "Dear User, Your OTP is:" + otp + " Use this to complete your Registration...Thank You";
-        Message message = Message.creator(to, from, otpMessage).create();
+        Integer re = forgotOtp(phoneNumber, otp.toString());
+        return true;
     }
 
-    public String otpForForgetPassword(String phoneNumber)
-    {
-        PhoneNumber to = new PhoneNumber("+91"+phoneNumber);
-        PhoneNumber from = new PhoneNumber(env.getProperty("app.trial_number"));
-        String otp = generateOTP(phoneNumber).toString();
-        System.out.println(otp);
-        String otpMessage = "Dear User, Your OTP is:" + otp + " Use this to change your password...Thank You";
-        Message message = Message.creator(to, from, otpMessage).create();
-        return "OTP send Successfully to Mobile Number";
-    }
 
-    private Integer generateOTP(String key) {
-
-        Random random = new Random();
-        Integer OTP = 100000 + random.nextInt(900000);
-        otpCache.put(key, OTP);
-        return OTP;
-    }
 
 
     @Override
-    public boolean loginUser(UserDto userDto)
+    public User loginUser(UserDto userDto)
     {
-        User user = authenticationRepository.findByEmail(userDto.getEmail()).get();
+        //User user =null;
+        User user=authenticationRepository.findByEmail(userDto.getEmail()).get();
         if (user != null)
         {
             String password = userDto.getPassword();
@@ -126,59 +81,57 @@ public class AuthenticationServiceImpl implements AuthenticationService{
             Boolean isPwdRight = passwordEncoder.matches(password,encodedPassword);
             if (isPwdRight)
             {
-                return true;
+                return user;
             } else
             {
-                return false;
+                return null;
             }
         }
 
-        return false;
+        return null;
     }
 
     @Override
-    public String sendOtpForForgetPassword(String phoneNumber)
+    public boolean sendOtpForForgetPassword(String phoneNumber)
     {
         User user=authenticationRepository.findByMobileNumber(phoneNumber);
         if(user!=null)
         {
             return otpForForgetPassword(phoneNumber);
         }
-        return "Mobile is not Registered";
+        return false;
 
     }
 
+    @Override
+    public boolean otpVerification(String phoneNumber, String otp) {
+
+        String pto = getOPTByKey(phoneNumber);
+        if(!otp.equals(pto))
+        {
+            return false;
+        }
+        return true;
+    }
 
 
     @Override
-    public String changePassword(String mobileNumber,String newPassword) {
-         if(newPassword==null)return "NULL password is not accepted";
+    public boolean changePassword(String mobileNumber,String newPassword) {
+         if(newPassword==null)return false;
 
          String encodedOldPassword=authenticationRepository.getOldPassword(mobileNumber);
          if(passwordEncoder.matches(newPassword,encodedOldPassword))// if new and old password matches
          {
-             return "Same as Old Password Try something new password";
+             return false;
          }
          else
          {
              authenticationRepository.setNewPassword(mobileNumber,passwordEncoder.encode(newPassword));
          }
 
-         return "Password changed successfully";
+         return true;
 
     }
 
-    @Override
-    public String otpVerification(String mobileNumber,String otp)
-    {
-
-        String pto = getOPTByKey(mobileNumber);
-        if(!otp.equals(pto))
-        {
-            return "Invalid Otp";
-        }
-        return "otp checked successfully";
-
-    }
 
 }

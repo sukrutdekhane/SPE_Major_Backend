@@ -8,15 +8,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 public interface AuthenticationService {
-    String register(UserDetailsAndOtpDto userDetailsAndOtpDto);
+    boolean register(User user,String otp);
 
-    void otpForRegistration(String phoneNumber);
+ //   boolean otpForRegistration(String phoneNumber);
 
-    boolean loginUser(UserDto userDto);
+    User loginUser(UserDto userDto);
 
-    String sendOtpForForgetPassword(String phoneNumber);
+   boolean sendOtpForForgetPassword(String phoneNumber);
 
-    String changePassword(String phoneNumber,String newPassword);
-
-    String otpVerification(String phoneNumber,String otp);
+   boolean changePassword(String phoneNumber,String newPassword);
+    boolean otpVerification(String phoneNumber,String otp);
 }
