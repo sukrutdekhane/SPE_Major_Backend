@@ -1,0 +1,2 @@
+[sukrut]
+client1 ansible_host=172.16.142.142 ansible_connection=ssh ansible_user=user1
