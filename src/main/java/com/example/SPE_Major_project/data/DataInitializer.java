@@ -54,7 +54,9 @@ package com.example.SPE_Major_project.data;
 //        };
 //    }
 //}
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -74,17 +76,31 @@ import org.springframework.stereotype.Component;
 @Component
 public class DataInitializer {
 
-    private static final String IMAGE_PATH = "dunkirk.txt";
-
+    private static final String IMAGE_PATH = "src/main/java/com/example/SPE_Major_project/data/dunkirk.txt";
+    public static String readFileToString(String filePath) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(filePath));
+        StringBuilder stringBuilder = new StringBuilder();
+        String line = reader.readLine();
+        while (line != null) {
+            stringBuilder.append(line);
+            stringBuilder.append(System.lineSeparator());
+            line = reader.readLine();
+        }
+        reader.close();
+        return stringBuilder.toString();
+    }
     @Bean
     public CommandLineRunner initializeData(MovieRepository movieRepository) {
         return args -> {
+
             Movie movie = new Movie();
             movie.setMovieName("sklljd");
 
             try {
-                String image = new String(Files.readAllBytes(Paths.get(IMAGE_PATH)), StandardCharsets.UTF_8);
-               // String image = Files.readLines(new File(IMAGE_PATH), Charsets.UTF_8);
+//                String image = new String(Files.readAllBytes(Paths.get(IMAGE_PATH)), StandardCharsets.UTF_8);
+//                String image = Files.readLines(new File(IMAGE_PATH), Charsets.UTF_8);
+                String image = readFileToString(IMAGE_PATH);
+                System.out.println(image);
                 movie.setMovieImage(image);
             } catch (IOException e) {
                 System.err.println("Error reading image file: " + e.getMessage());
@@ -113,8 +129,8 @@ public class DataInitializer {
             directors1.setDirectorName("Christopher Nolan");
             directors.add(directors1);
             movie.setDirectors(directors);
-
-            movieRepository.save(movie);
+            if(movieRepository.findByMovieNameContaining(movie.getMovieName())==null)
+                movieRepository.save(movie);
         };
     }
 }
