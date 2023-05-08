@@ -1,0 +1,84 @@
+version: '3.9'
+
+services:
+  db:
+    image: mysql:latest
+    healthcheck:
+      test: ["CMD", "ls"]
+      # interval: 1m30s
+      # timeout: 30s
+      # retries: 5
+      # start_period: 30s
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: MajorProject
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: myuserpass
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - backend-network
+
+  backend:
+    image: sukrutdekhane/spe_major_project_backend:latest
+    environment:
+      DB_URL: jdbc:mysql://db:3306/MajorProject?createDatabaseIfNotExist=true
+      DB_USERNAME: myuser
+      DB_PASSWORD: myuserpass
+    networks:
+      - backend-network
+    ports:
+      - "8081:8081"
+    depends_on:
+      db:
+        condition: service_healthy
+  frontend:
+    image: sukrutdekhane/spe_major_project_frontend:latest
+    networks:
+      - backend-network
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+networks:
+  backend-network:
+
+volumes:
+  db-data:
+# services:
+#   db:
+#     image: mysql
+#     healthcheck:
+#       test: ["CMD", "ls"]
+#     ports:
+#       - "3308:3306"
+#     environment:
+#       - MYSQL_ROOT_PASSWORD=password
+#     volumes:
+#       - myvol:/var/lib/mysql
+#     networks:
+#       - mynet
+#   backend:
+#     image: sukrutdekhane/spe_major_project_backend:latest
+#     ports:
+#       - "8081:8081"
+#     environment:
+#       - URL=db:3306
+#       # - IP=172.16.142.142
+#       # - PORT=3308
+#     depends_on:
+#       db:
+#         condition: service_healthy
+#     networks:
+#       - mynet
+#   frontend:
+#     image: sukrutdekhane/spe_major_project_frontend:latest
+#     ports:
+#       - "3000:3000"
+#     networks:
+#       - mynet
+# networks:
+#   mynet:
+# volumes:
+#   myvol:
