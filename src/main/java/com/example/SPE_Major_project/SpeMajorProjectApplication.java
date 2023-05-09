@@ -14,13 +14,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class SpeMajorProjectApplication {
 
-	private final Environment env;
-
-	@PostConstruct
-	public void initTwilio()
-	{
-		Twilio.init(env.getProperty("app.account_sid"),env.getProperty("app.auth_token"));
-	}
 	public static void main(String[] args) {
 		SpringApplication.run(SpeMajorProjectApplication.class, args);
 	}

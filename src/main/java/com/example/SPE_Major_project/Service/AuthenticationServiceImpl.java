@@ -39,13 +39,15 @@ public class AuthenticationServiceImpl implements AuthenticationService{
     private static LoadingCache<String, Integer> otpCache;
 
 
-    public boolean register(User request,String otp)
+    public int register(User request,String otp)
     {
+        User existingUser=authenticationRepository.findByMobileNumber(request.getMobileNumber());
+        if(existingUser!=null)return 2;
         String pto = getOPTByKey(request.getMobileNumber());
 
         if(!otp.equals(pto))
         {
-            return false;
+            return 0;
         }
         var user = User.builder()
                 .firstName(request.getFirstName())
@@ -56,7 +58,7 @@ public class AuthenticationServiceImpl implements AuthenticationService{
                 .build();
         var savedUser = authenticationRepository.save(user);
         log.info("User Registered");
-        return true;
+        return 1;
     }
 
 
@@ -76,6 +78,7 @@ public class AuthenticationServiceImpl implements AuthenticationService{
     {
         //User user =null;
         User user=authenticationRepository.findByEmail(userDto.getEmail());
+        System.out.println(user);
         if (user != null)
         {
             String password = userDto.getPassword();
