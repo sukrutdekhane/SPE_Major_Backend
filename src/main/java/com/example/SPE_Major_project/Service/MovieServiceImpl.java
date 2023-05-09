@@ -5,10 +5,12 @@ import com.example.SPE_Major_project.Entity.Reviews;
 import com.example.SPE_Major_project.Repository.MovieRepository;
 import com.example.SPE_Major_project.Repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MovieServiceImpl implements MovieService
