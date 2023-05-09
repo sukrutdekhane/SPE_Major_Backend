@@ -4,6 +4,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -13,7 +14,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-
+@Slf4j
 @Service
 public class OtpService
 {
@@ -122,6 +123,7 @@ public class OtpService
         }catch (Exception e) {
             e.printStackTrace();
         }
+        log.info("");
         return code;
     }
 }

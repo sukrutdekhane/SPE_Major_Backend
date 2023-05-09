@@ -10,6 +10,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.example.SPE_Major_project.Service.OtpService.*;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService{
@@ -54,6 +55,7 @@ public class AuthenticationServiceImpl implements AuthenticationService{
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
         var savedUser = authenticationRepository.save(user);
+        log.info("User Registered");
         return true;
     }
 
@@ -73,7 +75,7 @@ public class AuthenticationServiceImpl implements AuthenticationService{
     public User loginUser(UserDto userDto)
     {
         //User user =null;
-        User user=authenticationRepository.findByEmail(userDto.getEmail()).get();
+        User user=authenticationRepository.findByEmail(userDto.getEmail());
         if (user != null)
         {
             String password = userDto.getPassword();
@@ -81,13 +83,15 @@ public class AuthenticationServiceImpl implements AuthenticationService{
             Boolean isPwdRight = passwordEncoder.matches(password,encodedPassword);
             if (isPwdRight)
             {
+                log.info("User Logged In");
                 return user;
             } else
             {
+                log.error("Wrong password");
                 return null;
             }
         }
-
+        log.error("User not Found");
         return null;
     }
 
@@ -97,6 +101,7 @@ public class AuthenticationServiceImpl implements AuthenticationService{
         User user=authenticationRepository.findByMobileNumber(phoneNumber);
         if(user!=null)
         {
+
             return otpForForgetPassword(phoneNumber);
         }
         return false;

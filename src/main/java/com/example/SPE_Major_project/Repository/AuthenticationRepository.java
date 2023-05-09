@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface AuthenticationRepository extends JpaRepository<User,Integer> {
 
 
-    Optional<User> findByEmail(String email);
+    User findByEmail(String email);
 
     @Query("select u from User u where u.mobileNumber=?1")
     User findByMobileNumber(String mobileNumber);
