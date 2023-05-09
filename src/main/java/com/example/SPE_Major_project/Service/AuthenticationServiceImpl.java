@@ -75,7 +75,7 @@ public class AuthenticationServiceImpl implements AuthenticationService{
     public User loginUser(UserDto userDto)
     {
         //User user =null;
-        User user=authenticationRepository.findByEmail(userDto.getEmail()).get();
+        User user=authenticationRepository.findByEmail(userDto.getEmail());
         if (user != null)
         {
             String password = userDto.getPassword();
