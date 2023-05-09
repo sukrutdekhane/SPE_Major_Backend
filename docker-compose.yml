@@ -44,4 +44,4 @@ networks:
 
 volumes:
   db-data:
-  backend-volume-logs:
+  backendlogs:
