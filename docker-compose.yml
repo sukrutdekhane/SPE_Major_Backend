@@ -26,7 +26,7 @@ services:
     ports:
       - "8081:8081"
     volumes:
-      - backendlogs:backendlogs
+      - backendlogs:/backendlogs
     depends_on:
       db:
         condition: service_healthy
