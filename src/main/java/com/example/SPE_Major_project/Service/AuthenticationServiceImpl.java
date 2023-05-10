@@ -42,11 +42,16 @@ public class AuthenticationServiceImpl implements AuthenticationService{
     public int register(User request,String otp)
     {
         User existingUser=authenticationRepository.findByMobileNumber(request.getMobileNumber());
-        if(existingUser!=null)return 2;
+        if(existingUser!=null)
+        {
+            log.info("User already exist please login");
+            return 2;
+        }
         String pto = getOPTByKey(request.getMobileNumber());
 
         if(!otp.equals(pto))
         {
+            log.info("OTP miss-match");
             return 0;
         }
         var user = User.builder()
@@ -67,6 +72,7 @@ public class AuthenticationServiceImpl implements AuthenticationService{
         Integer otp = generateOTP(phoneNumber);
         System.out.println(otp);
         Integer re = forgotOtp(phoneNumber, otp.toString());
+        log.error("Send otp to registered mobile number");
         return true;
     }
 
@@ -76,7 +82,7 @@ public class AuthenticationServiceImpl implements AuthenticationService{
     @Override
     public User loginUser(UserDto userDto)
     {
-        //User user =null;
+
         User user=authenticationRepository.findByEmail(userDto.getEmail());
         System.out.println(user);
         if (user != null)
@@ -104,9 +110,9 @@ public class AuthenticationServiceImpl implements AuthenticationService{
         User user=authenticationRepository.findByMobileNumber(phoneNumber);
         if(user!=null)
         {
-
             return otpForForgetPassword(phoneNumber);
         }
+        log.error("User not found ");
         return false;
 
     }
@@ -117,8 +123,10 @@ public class AuthenticationServiceImpl implements AuthenticationService{
         String pto = getOPTByKey(phoneNumber);
         if(!otp.equals(pto))
         {
+            log.error("OTP miss-match");
             return false;
         }
+        log.error("OTP verified successfully");
         return true;
     }
 
@@ -130,11 +138,13 @@ public class AuthenticationServiceImpl implements AuthenticationService{
          String encodedOldPassword=authenticationRepository.getOldPassword(mobileNumber);
          if(passwordEncoder.matches(newPassword,encodedOldPassword))// if new and old password matches
          {
+             log.error("New password and old password are same");
              return false;
          }
          else
          {
              authenticationRepository.setNewPassword(mobileNumber,passwordEncoder.encode(newPassword));
+             log.error("New password set successfully");
          }
 
          return true;

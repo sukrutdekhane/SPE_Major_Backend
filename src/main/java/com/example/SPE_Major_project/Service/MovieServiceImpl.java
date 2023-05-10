@@ -43,18 +43,20 @@ public class MovieServiceImpl implements MovieService
                 .movieName(movieName)
                 .review(review).build();
         reviewRepository.save(r);
+        log.info("your review saved successfully");
         return true;
     }
 
     @Override
     public List<Movie> getAllMovie() {
+        log.info("get details of all movies");
         return movieRepository.getDetailsOfAllMovies();
     }
 
     @Override
     public List<Reviews> getAllReviewsByMovieName(String movieName) {
         if(movieName==null)return null;
-
+        log.info("get all review of movie");
         return reviewRepository.getReviewByMovieName(movieName);
 
 
