@@ -64,7 +64,7 @@ public class DataInitializer {
             directors1.setDirectorName("Christopher Nolan");
             directors.add(directors1);
             movie.setDirectors(directors);
-            if(movieRepository.findByMovieNameContaining(movie.getMovieName())==null)movieRepository.save(movie);
+            if(movieRepository.findByMovieNameContaining(movie.getMovieName()).isEmpty())movieRepository.save(movie);
 
 
             //movie
@@ -95,7 +95,7 @@ public class DataInitializer {
             directors2.setDirectorName("David Ayer");
             directorList.add(directors2);
             movie1.setDirectors(directorList);
-            if(movieRepository.findByMovieNameContaining(movie1.getMovieName())==null)movieRepository.save(movie1);
+            if(movieRepository.findByMovieNameContaining(movie1.getMovieName()).isEmpty())movieRepository.save(movie1);
 
 
             //movie
@@ -126,7 +126,7 @@ public class DataInitializer {
             directors3.setDirectorName("Christopher Nolan");
             directorList1.add(directors3);
             movie2.setDirectors(directorList1);
-            if(movieRepository.findByMovieNameContaining(movie2.getMovieName())==null)movieRepository.save(movie2);
+            if(movieRepository.findByMovieNameContaining(movie2.getMovieName()).isEmpty())movieRepository.save(movie2);
 
 
             //movie
@@ -158,7 +158,7 @@ public class DataInitializer {
             directors4.setDirectorName("Martin Scorsese");
             directorList2.add(directors4);
             movie3.setDirectors(directorList2);
-            if(movieRepository.findByMovieNameContaining(movie3.getMovieName())==null)movieRepository.save(movie3);
+            if(movieRepository.findByMovieNameContaining(movie3.getMovieName()).isEmpty())movieRepository.save(movie3);
 
 
             //movie
@@ -186,7 +186,7 @@ public class DataInitializer {
             directors5.setDirectorName("Ashutosh Gowariker");
             directorList3.add(directors5);
             movie4.setDirectors(directorList3);
-            if(movieRepository.findByMovieNameContaining(movie4.getMovieName())==null)movieRepository.save(movie4);
+            if(movieRepository.findByMovieNameContaining(movie4.getMovieName()).isEmpty())movieRepository.save(movie4);
 
 
 
@@ -215,10 +215,10 @@ public class DataInitializer {
 
             List<Directors> directorList4= new ArrayList<>();
             Directors directors6 = new Directors();
-            directors6.setDirectorName("\tRajkumar Hirani");
+            directors6.setDirectorName("Rajkumar Hirani");
             directorList4.add(directors6);
             movie5.setDirectors(directorList4);
-            movieRepository.save(movie5);
+            if(movieRepository.findByMovieNameContaining(movie5.getMovieName()).isEmpty())movieRepository.save(movie5);
 
 
         };
