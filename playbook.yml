@@ -8,7 +8,6 @@
         dest: ./
     - name:  docker-compose down
       command: docker-compose down
-    - name: remove old images
-      command: docker image rm -f $(docker images -q)
+
     - name: run docker-compose file
       command: docker-compose up -d
