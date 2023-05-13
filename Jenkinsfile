@@ -24,9 +24,7 @@ pipeline {
         }
         stage('Docker Build Image frontend') {
                     steps {
-                        script{
-                            dockerimagefrontend=docker.build "sukrutdekhane/spe_major_project_backend:latest"
-                        }
+                            sh 'docker build -t sukrutdekhane/spe_major_project_frontend:latest ./spe_major_project_frontend-main'
                     }
                 }
         stage('Push Docker Image') {
