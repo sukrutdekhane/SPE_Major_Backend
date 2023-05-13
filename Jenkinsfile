@@ -42,7 +42,7 @@ pipeline {
                         sh 'docker push sukrutdekhane/spe_major_project_frontend:latest'
                          }
                     }
-                }
+
          stage('Ansible copy docker-compose file in client user1') {
             steps {
               ansiblePlaybook becomeUser: null, colorized: true, disableHostKeyChecking: true,
