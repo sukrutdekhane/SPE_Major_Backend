@@ -24,12 +24,10 @@ pipeline {
         }
         stage('Docker Build Image frontend') {
                     steps {
-                            sh 'cd spe_major_project_frontend-main'
                             sh 'docker build -t sukrutdekhane/spe_major_project_frontend:latest ./spe_major_project_frontend-main'
-                            sh 'cd ..'
                     }
                 }
-        stage('Push Docker Image') {
+        stage('Push Docker Image backend') {
             steps {
                 script{
                     docker.withRegistry('','docker-hub'){
@@ -39,6 +37,12 @@ pipeline {
                 }
             }
         }
+         stage('Push Docker Image frontend') {
+                     steps {
+                        sh 'docker push sukrutdekhane/spe_major_project_frontend:latest'
+                         }
+                    }
+                }
          stage('Ansible copy docker-compose file in client user1') {
             steps {
               ansiblePlaybook becomeUser: null, colorized: true, disableHostKeyChecking: true,
