@@ -32,7 +32,6 @@ pipeline {
                 script{
                     docker.withRegistry('','docker-hub'){
                     dockerimagebackend.push()
-                    dockerimagefrontend.push()
                     }
                 }
             }
