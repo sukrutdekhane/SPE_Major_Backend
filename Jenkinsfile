@@ -26,7 +26,9 @@ pipeline {
                     steps {
                              dir('./spe_major_project_frontend-main') {
                              /* execute commands in the scripts directory */
-                              dockerimagefrontend=docker.build "sukrutdekhane/spe_major_project_frontend:latest"
+                              script{
+                                 dockerimagefrontend=docker.build "sukrutdekhane/spe_major_project_frontend:latest"
+                                 }
                            }
                       }
                 }
