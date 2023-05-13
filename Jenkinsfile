@@ -1,6 +1,5 @@
 pipeline {
      environment{
-        dockerimagefrontend=""
         dockerimagebackend=""
     }
     agent any
