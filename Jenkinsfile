@@ -1,5 +1,6 @@
 pipeline {
      environment{
+        dockerimagefrontend=""
         dockerimagebackend=""
     }
     agent any
@@ -23,23 +24,22 @@ pipeline {
         }
         stage('Docker Build Image frontend') {
                     steps {
-                            sh 'docker build -t sukrutdekhane/spe_major_project_frontend:latest ./spe_major_project_frontend-main'
-                    }
+                             dir('./spe_major_project_frontend-main') {
+                             /* execute commands in the scripts directory */
+                              dockerimagefrontend=docker.build "sukrutdekhane/spe_major_project_frontend:latest"
+                           }
+                      }
                 }
-        stage('Push Docker Image backend') {
+        stage('Push Docker Image') {
             steps {
                 script{
                     docker.withRegistry('','docker-hub'){
                     dockerimagebackend.push()
+                    dockerimagefrontend.push()
                     }
                 }
             }
         }
-         stage('Push Docker Image frontend') {
-                     steps {
-                        sh 'docker push sukrutdekhane/spe_major_project_frontend:latest'
-                         }
-                    }
 
          stage('Ansible copy docker-compose file in client user1') {
             steps {
