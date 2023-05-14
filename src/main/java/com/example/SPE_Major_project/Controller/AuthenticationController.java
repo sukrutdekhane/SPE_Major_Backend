@@ -1,31 +1,46 @@
 package com.example.SPE_Major_project.Controller;
 
-import com.example.SPE_Major_project.Dto.UserDetailsAndOtpDto;
+import com.example.SPE_Major_project.Dto.AuthenticationResponse;
 import com.example.SPE_Major_project.Dto.UserDto;
 import com.example.SPE_Major_project.Entity.User;
 import com.example.SPE_Major_project.Repository.AuthenticationRepository;
 import com.example.SPE_Major_project.Service.AuthenticationService;
-import com.example.SPE_Major_project.Service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import static com.example.SPE_Major_project.Service.OtpService.generateOTP;
 import static com.example.SPE_Major_project.Service.OtpService.sendOTP;
 
 @RestController
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthenticationController
 {
     private final AuthenticationService authenticationService;
     private final AuthenticationRepository authenticationRepository;
 
-    private final UserService userService;
 
+    //Register
     @PostMapping("/validate-otp-register")
     public int register(@RequestBody User user,@RequestParam String otp) {
 
         return authenticationService.register(user,otp);
     }
+
+    //login
+    @PostMapping("/login")
+    public ResponseEntity<AuthenticationResponse> login(@RequestBody UserDto userDto
+    ) {
+
+        AuthenticationResponse authenticationResponse=AuthenticationResponse.builder()
+                .token(authenticationService.loginUser(userDto).getToken())
+                .build();
+        return ResponseEntity.ok(authenticationResponse);
+    }
+
+
+
 
     @PostMapping("/send-otp")
     public int sendSms(@RequestParam String phoneNumber)
@@ -61,10 +76,7 @@ public class AuthenticationController
     }
 
 
-    @PostMapping("/login")
-    public User loginPatient(@RequestBody UserDto userDto){
-        return authenticationService.loginUser(userDto);
-    }
+
 
     @PostMapping("/forget-password")
     public boolean forgetPassword(@RequestParam String phoneNumber)
