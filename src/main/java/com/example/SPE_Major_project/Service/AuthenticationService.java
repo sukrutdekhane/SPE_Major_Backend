@@ -1,6 +1,6 @@
 package com.example.SPE_Major_project.Service;
 
-import com.example.SPE_Major_project.Dto.UserDetailsAndOtpDto;
+import com.example.SPE_Major_project.Dto.AuthenticationResponse;
 import com.example.SPE_Major_project.Dto.UserDto;
 import com.example.SPE_Major_project.Entity.User;
 import org.springframework.stereotype.Component;
@@ -12,7 +12,7 @@ public interface AuthenticationService {
 
  //   boolean otpForRegistration(String phoneNumber);
 
-    User loginUser(UserDto userDto);
+    AuthenticationResponse loginUser(UserDto userDto);
 
    boolean sendOtpForForgetPassword(String phoneNumber);
 

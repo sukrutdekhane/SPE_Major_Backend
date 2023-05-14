@@ -5,15 +5,13 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-@Repository
 public interface AuthenticationRepository extends JpaRepository<User,Integer> {
 
 
-    User findByEmail(String email);
+    Optional<User> findByEmail(String email);
 
     @Query("select u from User u where u.mobileNumber=?1")
     User findByMobileNumber(String mobileNumber);
@@ -25,4 +23,5 @@ public interface AuthenticationRepository extends JpaRepository<User,Integer> {
     @Transactional
     @Query("update User u set u.password=?2 where u.mobileNumber=?1")
     void setNewPassword(String mobileNumber,String newPassword);
+
 }

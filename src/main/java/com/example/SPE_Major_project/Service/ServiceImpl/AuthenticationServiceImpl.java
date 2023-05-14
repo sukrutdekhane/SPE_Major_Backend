@@ -1,40 +1,46 @@
-package com.example.SPE_Major_project.Service;
+package com.example.SPE_Major_project.Service.ServiceImpl;
 
 
 
-import com.example.SPE_Major_project.Dto.UserDetailsAndOtpDto;
+import com.example.SPE_Major_project.Dto.AuthenticationResponse;
+import com.example.SPE_Major_project.Configuration.JwtService;
 import com.example.SPE_Major_project.Dto.UserDto;
+import com.example.SPE_Major_project.Entity.Role;
+import com.example.SPE_Major_project.Entity.Token;
+import com.example.SPE_Major_project.Entity.TokenType;
 import com.example.SPE_Major_project.Entity.User;
+
+
 import com.example.SPE_Major_project.Repository.AuthenticationRepository;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
+import com.example.SPE_Major_project.Repository.TokenRepository;
+import com.example.SPE_Major_project.Service.AuthenticationService;
 import com.google.common.cache.LoadingCache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.twilio.rest.api.v2010.account.Message;
-import com.twilio.type.PhoneNumber;
 
-import javax.management.modelmbean.ModelMBeanInfo;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 import static com.example.SPE_Major_project.Service.OtpService.*;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AuthenticationServiceImpl implements AuthenticationService{
+public class AuthenticationServiceImpl implements AuthenticationService {
+
+    private final AuthenticationRepository authenticationRepository;
+    private final TokenRepository tokenRepository;
+
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+
+    private final AuthenticationManager authenticationManager;
 
 
     private static final Integer EXPIRE_MIN = 5;
-
-    private final PasswordEncoder passwordEncoder;
-    private final AuthenticationRepository authenticationRepository;
 
     private static LoadingCache<String, Integer> otpCache;
 
@@ -59,12 +65,65 @@ public class AuthenticationServiceImpl implements AuthenticationService{
                 .lastName(request.getLastName())
                 .mobileNumber(request.getMobileNumber())
                 .email(request.getEmail())
+                .role(Role.USER)
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
         var savedUser = authenticationRepository.save(user);
+        var jwtToken=jwtService.generateToken(user,Role.USER);
         log.info("User Registered");
         return 1;
     }
+
+
+    @Override
+    public AuthenticationResponse loginUser(UserDto userDto)
+    {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        userDto.getEmail(),
+                        userDto.getPassword()
+                )
+        );
+        var user = authenticationRepository.findByEmail(userDto.getEmail())
+                .orElseThrow();
+        var jwtToken=jwtService.generateToken(user,user.getRole());
+        revokeAllUserTokens(user);
+        savedUserToken(user,jwtToken);
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .build();
+
+    }
+
+
+    private void revokeAllUserTokens(User user){
+        var validUserToken = tokenRepository.findAllValidTokenByUser(user.getUserId());
+        if(validUserToken.isEmpty())
+            return;
+        validUserToken.forEach(t -> {
+            t.setExpired(true);
+            t.setRevoked(true);
+        });
+        tokenRepository.saveAll(validUserToken);
+
+    }
+
+    private void savedUserToken(User user, String jwtToken) {
+        var token= Token.builder()
+                .user(user)
+                .token(jwtToken)
+                .tokenType(TokenType.BEARER)
+                .revoked(false)
+                .expired(false)
+                .build();
+
+        tokenRepository.save(token);
+    }
+
+
+
+
+
 
 
     public boolean otpForForgetPassword(String phoneNumber)
@@ -79,30 +138,7 @@ public class AuthenticationServiceImpl implements AuthenticationService{
 
 
 
-    @Override
-    public User loginUser(UserDto userDto)
-    {
 
-        User user=authenticationRepository.findByEmail(userDto.getEmail());
-        System.out.println(user);
-        if (user != null)
-        {
-            String password = userDto.getPassword();
-            String encodedPassword = user.getPassword();
-            Boolean isPwdRight = passwordEncoder.matches(password,encodedPassword);
-            if (isPwdRight)
-            {
-                log.info("User Logged In");
-                return user;
-            } else
-            {
-                log.error("Wrong password");
-                return null;
-            }
-        }
-        log.error("User not Found");
-        return null;
-    }
 
     @Override
     public boolean sendOtpForForgetPassword(String phoneNumber)
